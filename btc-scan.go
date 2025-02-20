@@ -101,7 +101,7 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 		Action: "TRANSACTION",
 		TXInfo: apisdk.TXInfo{
 			Chain:           "BTC",
-			TransactionType: "transfer",
+			TransactionType: "native",
 			To:              address,
 			From:            WalletAddress,
 			Value:           amount,
@@ -150,7 +150,6 @@ func ScanBtcTxs(checkpoint string) ([]SimpleBtcTransfer, string, error) {
 		}
 
 		if simpleTx.ToAddress == WalletAddress { //对跨入交易，从vout中获取memo地址
-			simpleTx.MemoAddress = simpleTx.FromAddress
 			url := "https://mempool.space/api/tx/" + simpleTx.TxId
 			resp, err := http.Get(url)
 			if err != nil {
@@ -178,7 +177,8 @@ func ScanBtcTxs(checkpoint string) ([]SimpleBtcTransfer, string, error) {
 
 func main() {
 	InitClient("bc1qmax35qkxgke2aq2xugaxjl96q8f0k7l3ndhz9g", "361bdf3a1e0640979a3e2240c3361609", "U3IXmFgR848q5XA1vQVgdvW1Z69UvQXD", "10.10.2.78:8998")
-	aid, err := SubmitSendBtcApproval("bc1qmfg0j2gvegay6zy8638jdlh0fw82w99xkulvkd", "10000000")
-	fmt.Println(aid, err)
-	//ScanBtcTxs("0")
+	//aid, err := SubmitSendBtcApproval("bc1qmfg0j2gvegay6zy8638jdlh0fw82w99xkulvkd", "10000000")
+	//fmt.Println(aid, err)
+	txs, ck, err := ScanBtcTxs("0")
+	fmt.Println(txs, ck, err)
 }
