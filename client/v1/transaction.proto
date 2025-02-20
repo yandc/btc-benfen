@@ -1,0 +1,741 @@
+syntax = "proto3";
+
+package api.transaction.v1;
+
+option go_package = "tx-builder/api/builder/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.transaction.v1";
+
+
+service Transaction {
+  rpc CreateRecordFromWallet(TransactionReq) returns (CreateResponse);
+  //根据hash查询交易记录
+  rpc GetTransactionByHash(GetTransactionByHashRequest) returns (TransactionRecord);
+  //分页查询交易记录列表
+  rpc PageLists(PageListRequest) returns (PageListResponse);
+  //分页查询交易记录列表(原交易、加速和取消的会折叠处理)
+  rpc PageList(PageListRequest) returns (PageListResponse);
+  //查询pending状态的总金额
+  rpc GetAmount(AmountRequest) returns (AmountResponse);
+  rpc GetDappList(DappListReq) returns (DappListResp);
+  rpc GetAllOpenAmount(OpenAmountReq) returns (OpenAmoutResp);
+  rpc GetNonce(NonceReq) returns (NonceResp);
+  rpc GetDappListPageList(DappPageListReq) returns (DappPageListResp);
+  //分页查询包含折合成法币的用户资产列表
+  rpc PageListAssetCurrency(PageListAssetRequest) returns (PageListAssetResponse);
+  //管理平台分页查询用户资产列表
+  rpc PageListAsset(PageListAssetRequest) returns (PageListAssetResponse);
+  //管理平台分页查询用户资产分组列表
+  rpc PageListAssetGroup(PageListAssetRequest) returns (PageListAssetResponse);
+  //客户端分页查询用户资产列表
+  rpc ClientPageListAsset(PageListAssetRequest) returns (PageListAssetResponse);
+  //查询用户余额
+  rpc GetBalance(AssetRequest) returns (ListBalanceResponse);
+  //根据uid维度查询用户金额列表
+  rpc ListAmountUidDimension(ListAmountUidDimensionRequest) returns (ListAmountUidDimensionResponse);
+  //根据uid维度查询用户是否有余额列表
+  rpc ListHasBalanceUidDimension(ListHasBalanceUidDimensionRequest) returns (ListHasBalanceUidDimensionResponse);
+  //根据指定维度查询用户是否有余额列表
+  rpc ListHasBalanceDimension(ListHasBalanceDimensionRequest) returns (ListHasBalanceDimensionResponse);
+  //交易数据看板查询资沉量趋势图
+  rpc AssetHistoryFundAmount(AssetHistoryRequest) returns (AssetHistoryFundAmountListResponse);
+  //交易数据看板查询钱包地址数趋势图
+  rpc AssetHistoryAddressAmount(AssetHistoryRequest) returns (AssetHistoryAddressAmountListResponse);
+  //客户端分页查询用户NFT资产分组列表
+  rpc ClientPageListNftAssetGroup(PageListNftAssetRequest) returns (ClientPageListNftAssetGroupResponse);
+  //客户端分页查询用户NFT资产列表
+  rpc ClientPageListNftAsset(PageListNftAssetRequest) returns (ClientPageListNftAssetResponse);
+  //查询用户NFT余额
+  rpc GetNftBalance(NftAssetRequest) returns (NftBalanceResponse);
+  //管理平台分页查询交易数据统计列表
+  rpc PageListStatistic(PageListStatisticRequest) returns (PageListStatisticResponse);
+  //管理平台交易数据看板查询金额趋势图
+  rpc StatisticFundAmount(StatisticFundRequest) returns (FundAmountListResponse);
+  //管理平台交易数据看板查询金额占比图
+  rpc StatisticFundRate(StatisticFundRequest) returns (FundRateListResponse);
+  //未花费资产查询
+  rpc GetUnspentTx(UnspentReq) returns (UnspentResponse);
+  //后去nft流转记录
+  rpc GetNftRecord(NftRecordReq) returns (NftRecordResponse);
+  //通用 接口定义
+  rpc JsonRpc(JsonReq) returns (JsonResponse);
+  // 看板数据汇总
+  rpc KanbanSummary(KanbanSummaryRequest) returns (KanbanSummaryResponse);
+  // 看板交易数据
+  rpc KanbanTxChart(KanbanChartRequest) returns (KanbanChartResponse);
+  // 看板合约数据
+  rpc KanbanContractChart(KanbanChartRequest) returns (KanbanChartResponse);
+  // 获取块高
+  rpc GetBlockHeight(GetBlockHeightReq) returns (GetBlockHeightResponse);
+}
+
+message JsonReq {
+  string method = 1 ;
+  string uid = 2 ;
+  string chainName = 3 ;
+  string params = 4 ;
+  string device = 5;
+}
+
+message JsonResponse{
+  bool ok = 1;
+  string response = 2;
+  string errorMsg = 3;
+}
+
+message NftRecordReq {
+  string chainName = 1;
+  string contractAddress = 2;
+  string tokenId = 3;
+}
+
+message NftRecordResponse {
+  bool ok = 1;
+  repeated NftHistoryList data = 2;
+}
+
+message NftHistoryList {
+  string fromAddress = 1;
+  string toAddress = 2;
+  string Quantity = 3;
+  string txTime = 4;
+  string transactionType = 5;
+  string transactionHash = 6;
+}
+
+message UnspentReq{
+  string chainName = 1;
+  string isUnspent = 2;
+  string uid = 3;
+  string address = 4;
+  string txHash = 5;
+  string contractAddress = 6;
+}
+
+message UnspentResponse{
+  bool ok = 1;
+  repeated CellList cell_list = 2;
+  repeated UnspentList utxo_list = 3;
+  repeated CellList token_cell_list = 4;
+}
+
+message UnspentList{
+  int64 id = 1;
+  string uid = 2;
+  string hash = 3;
+  string index = 4;
+  string chainName = 5;
+  string address = 6;
+  string script = 7;
+  int32 unspent = 8;
+  string amount = 9;
+  int64 txTime = 10;
+  int64 createdAt = 11;
+  int64 updatedAt = 12;
+}
+
+message CellList{
+  OutPoint outPoint = 1;
+  int64 capacity = 2;
+  CellLock lock = 3;
+  CellLock type = 4;
+  string data = 5;
+}
+
+message OutPoint {
+  string txHash = 1;
+  string index = 2;
+}
+
+message CellLock {
+  string codeHash = 1;
+  string hashType = 2;
+  string args = 3;
+}
+
+message DappPageListReq{
+  string chainName = 1;
+  string contractAddress = 2;
+  int32 page = 3;// 默认1
+  int32 limit = 4;//  默认20
+  string fromuid = 5;
+  string fromAddress = 6;
+  string orderBy = 7;
+  int32 dataDirection = 8;
+  int64 startIndex = 9 ;
+  string dappType = 10 ;
+  string platform = 11;
+  int32 osVersion = 12;
+
+}
+
+message DappPageListResp{
+  bool ok = 1;
+  DappPageData data = 2;
+}
+
+message DappPageData{
+  int32 page = 1;
+  int32 limit = 2;
+  int64 total = 3;
+  repeated TransactionRecord data = 4;
+}
+
+
+message NonceReq{
+  string chainName = 1 ;
+  string address = 2 ;
+}
+
+message NonceResp{
+  bool ok = 1;
+  int64 nonce = 2;
+}
+
+message OpenAmountReq{
+  string uid = 1 ; //--非必输
+  string currency = 2; // -- 必输  法币标的物
+  string chainName = 3;//  -- 非必输
+  string address = 4; //-- 非必输
+  string contractAddress = 5;//  -- 非必输
+}
+
+message OpenAmoutResp{
+  bool ok = 1;
+  OpenAmountInfo data = 2;
+}
+
+message OpenAmountInfo {
+  string riskExposureAmount = 1;
+  int64 dappCount = 2;
+}
+
+
+message DappListReq {
+  string uid = 1 ;//-- 必输
+  string chainName = 2 ;//-- 必输
+  repeated string addresses = 3; //-- 非必输
+  string contractAddress = 4;// -- 非必输
+  bool isCancel = 5 ;
+  string isCancelStatus = 6 ;
+  string dappType = 7 ;
+  string platform = 8;
+  int32 osVersion = 9;
+}
+
+
+message DappListResp {
+  bool ok = 1;
+  repeated DappInfo data = 2;
+}
+
+message DappInfo {
+  string contractAddress = 1;
+  string chain = 2;
+  string uid = 3;
+  string lastTxhash = 4;
+  string decimals = 5;
+  string address = 6;
+  string token = 7;
+  string toAddress = 8;
+  string amount = 9;
+  string original = 10 ;
+  string symbol = 11;
+  string dappInfo = 12;
+  string status = 13;
+  int64  txTime = 14;
+  string dappType = 15;
+  string collectionName = 16;
+  string logo = 17;
+}
+
+
+message CreateResponse {
+  bool status = 1;
+  uint64 code = 2;
+  string mes = 3;
+}
+
+message TransactionReq {
+  string uid = 1 ;//-- 必输
+  string chainName = 2 ;//-- 必输
+  string transactionHash = 3 ; // -- 必输
+  string status = 4 ; // (status[success,fail,pending,refuse,no_status,cancel,invalid]) -- 必输
+  string fromAddress = 5 ;//  -- 必输
+  string toAddress = 6 ;//  -- 必输
+  string amount = 7 ; // -- 必输
+  string feeAmount = 8 ;//  -- 非必输
+  string transactionType = 9 ;//  -- 非必输
+  string contractAddress = 10;//   -- 非必输
+  int64 txTime = 11 ;// -- 非必输
+  int64 nonce = 12;//  -- 非必输
+  string gasLimit = 13 ;//  -- 非必输 Deprecated by feeData
+  string gasUsed = 14;// -- 非必输 Deprecated by feeData
+  string gasPrice = 15;//  -- 非必输 Deprecated by feeData
+  string baseFee = 16;// -- 非必输 Deprecated by feeData
+  string data = 17;//  -- 非必输
+  string dappData = 18;//  -- 非必输
+  string eventLog = 19;//  -- 非必输
+  string parseData = 20;//  -- 非必输 Deprecated
+  string netUsage = 21;//  -- 非必输 Deprecated by feeData
+  string feeLimit = 22;//  -- 非必输 Deprecated by feeData
+  string energyUsage = 23;//  -- 非必输 Deprecated by feeData
+  string blockHash = 24 ;//-- 非必输
+  int64 blockNumber = 25 ;//  -- 非必输
+  int64 createdAt = 26 ;// -- 非必输
+  int64 updatedAt = 27 ;// -- 非必输
+  string clientData = 28 ; // Deprecated
+  string maxFeePerGas = 29;
+  string maxPriorityFeePerGas = 30;
+  string feeData = 31;
+  string operateType = 32;
+  string originalHash = 33;
+  string tokenGasless = 34;
+  string tokenInfo = 35;
+  int64 sendTime = 36;
+  string sessionId = 37;
+	string shortHost = 38;
+	string memo = 39;
+}
+
+message GetTransactionByHashRequest{
+  string platform = 1;
+  int32 osVersion = 2;
+  string chainName = 3;
+  string hash = 4;
+}
+
+message PageListRequest {
+  string chainName = 1 ;//-- 必输
+  string fromUid = 2;
+  string toUid = 3;
+  string uid = 4;
+  repeated string fromAddressList = 5;
+  repeated string toAddressList = 6;
+  string address = 7;
+  string contractAddress = 8;
+  repeated string statusList = 9;
+  repeated string statusNotInList = 10;
+  repeated string transactionTypeList = 11;
+  repeated string transactionTypeNotInList = 12;
+  repeated string transactionHashList = 13;
+  int64 startTime = 14 ;
+  int64 stopTime = 15 ;
+  string orderBy = 16;
+  int32 dataDirection = 17;
+  int64 startIndex = 18 ;
+  int32 pageNum = 19 ;
+  int32 pageSize = 20 ;
+  bool total = 21;
+  string platform = 22;
+  int32 osVersion = 23;
+  repeated string operateTypeList = 24;
+  string tokenAddress = 25;
+  string assetType = 26;
+  optional int64 nonce = 27;
+  string paymentId = 28;
+  string payEventType = 29;
+}
+
+message PageListResponse {
+  int64 total = 1;
+  repeated TransactionRecord list = 2;
+}
+
+message TransactionRecord {
+  int64 id = 1;
+  string chainName = 2;
+  string blockHash = 3;
+  int64 blockNumber = 4;
+  string transactionHash = 5;
+  string fromAddress = 6;
+  string toAddress = 7;
+  string fromUid = 8;
+  string toUid = 9;
+  string amount = 10;
+  string feeAmount = 11;
+  string status = 12;
+  string transactionType = 13;
+  string contractAddress = 14;
+  int64 txTime = 15;
+  int64 nonce = 16;
+  string gasLimit = 17;
+  string gasUsed = 18;
+  string gasPrice = 19;
+  string baseFee = 20;
+  string maxFeePerGas = 21;
+  string maxPriorityFeePerGas = 22;
+  string data = 23;
+  string dappData = 24;
+  string eventLog = 25;
+  string parseData = 26;
+  string netUsage = 27;
+  string feeLimit = 28;
+  string energyUsage = 29;
+  int64 createdAt = 30;
+  int64 updatedAt = 31;
+  string clientData = 32;
+  string feeData = 33;
+  int64 cursor = 34;
+  string operateType = 35;
+  string originalHash = 36;
+  repeated TransactionRecord operateRecordList = 37;
+  string tokenGasless = 38;
+  string tokenInfo = 39;
+  int64 sendTime = 40;
+  string sessionId = 41;
+  string statusDetail = 42;
+	string shortHost = 43;
+	string memo = 44;
+	string eventLogCount=45;
+	string paymentId = 46;
+	string payEventType = 47;
+}
+
+message AmountRequest {
+  string chainName = 1 ;//-- 必输
+  string fromUid = 2;
+  string toUid = 3;
+  repeated string fromAddressList = 4;
+  repeated string toAddressList = 5;
+  repeated string transactionTypeList = 6;
+}
+
+message AmountResponse {
+  string amount = 1;
+}
+
+message PageListAssetRequest {
+  string chainName = 1;//-- 非必输
+  string uid = 2;
+  repeated string addressList = 3;// ;
+  repeated string tokenAddressList = 4;
+  string currency = 5;// }]; //-- 币种: CNY:人民币, USD:美元
+  int32 amountType = 6;
+  string orderBy = 7;
+  int32 dataDirection = 8;
+  int64 startIndex = 9 ;
+  int32 pageNum = 10 ;
+  int32 pageSize = 11 ;
+  bool total = 12;
+  int32 addressType = 13;//钱包类型: 0:ALL(不传默认查询所有钱包类型), 1:PERSON(个人钱包), 2:COMPANY(企业钱包), 3:COADMIN(共管钱包)
+  int32 tokenType = 14;//代币类型: 0:不传默认查询主币和普通代币, 1:查询主币, 2:查询普通代币
+  string currencyAmountMoreThan = 15;//法币金额大于
+}
+
+message PageListAssetResponse {
+  int64 total = 1;
+  string totalCurrencyAmount = 2;
+  repeated AssetResponse list = 3;
+}
+
+message AssetResponse {
+  int64 id = 1;
+  string chainName = 2;
+  string uid = 3;
+  string address = 4;
+  string tokenAddress = 5;
+  string balance = 6;
+  int32 decimals = 7;
+  string symbol = 8;
+  string currencyAmount = 9;
+  int64 createdAt = 10;
+  int64 updatedAt = 11;
+  int64 cursor = 12;
+  string price = 13;
+  int32 addressType = 14;//钱包类型: 1:PERSON(个人钱包), 2:COMPANY(企业钱包), 3:COADMIN(共管钱包)
+  string tokenUri = 15;
+  bool isSyncToChain = 16;
+  int64 syncToChainTs = 17;
+}
+
+message AssetRequest {
+  string chainName = 1 ;//-- 必输
+  string address = 2 ;//-- 必输
+  repeated string tokenAddressList = 3 ;//-- 必输
+}
+
+message ListBalanceResponse {
+  repeated BalanceResponse list = 1;
+}
+
+message BalanceResponse {
+  string tokenAddress = 1;
+  string balance = 2;
+}
+
+message ListAmountUidDimensionRequest {
+  string currency = 1;//-- 必输 // }]; //-- 币种: CNY:人民币, USD:美元
+  repeated string uidList = 2 ;//-- 必输
+  string chainName = 3;
+}
+
+message ListAmountUidDimensionResponse {
+  repeated AmountUidDimensionResponse list = 1;
+}
+
+message AmountUidDimensionResponse {
+  string uid = 1;
+  string currencyAmount = 2;
+}
+
+message ListHasBalanceUidDimensionRequest {
+  repeated string uidList = 1 ;//-- 必输
+}
+
+message ListHasBalanceUidDimensionResponse {
+  repeated HasBalanceUidDimensionResponse list = 1;
+}
+
+message HasBalanceUidDimensionResponse {
+  string uid = 1;
+  bool hasBalance = 2;
+}
+
+message ListHasBalanceDimensionRequest {
+  string chainName = 1;
+  repeated string uidList = 2;
+  repeated string addressList = 3;
+  string groupBy = 4;
+}
+
+message ListHasBalanceDimensionResponse {
+  repeated HasBalanceDimensionResponse list = 1;
+}
+
+message HasBalanceDimensionResponse {
+  string column = 1;
+  bool hasBalance = 2;
+}
+
+message AssetHistoryRequest {
+  string chainName = 1;//-- 非必输
+  int32 addressType = 2;//钱包类型: 0:ALL(不传默认查询所有钱包类型), 1:PERSON(个人钱包), 2:COMPANY(企业钱包), 3:COADMIN(共管钱包)
+  int64 startTime = 3 ;
+  int64 stopTime = 4 ;
+}
+
+message AssetHistoryFundAmountListResponse {
+  repeated AssetHistoryFundAmountResponse list = 1;
+}
+
+message AssetHistoryFundAmountResponse {
+  string cnyAmount = 1;
+  string usdAmount = 2;
+  int64 dt = 3;
+	string btcAmount = 4;
+}
+
+message AssetHistoryAddressAmountListResponse {
+  repeated AssetHistoryAddressAmountResponse list = 1;
+}
+
+message AssetHistoryAddressAmountResponse {
+  int64 addressAmount = 1;
+  int64 dt = 2;
+}
+
+message PageListNftAssetRequest {
+  string chainName = 1;//-- 非必输
+  string uid = 2;
+  repeated string addressList = 3;// ;
+  repeated string tokenAddressList = 4;
+  repeated string tokenIdList = 5;
+  string currency = 6;// }]; //-- 币种: CNY:人民币, USD:美元
+  int32 amountType = 7;
+  string collectionNameLike = 8;
+  string orderBy = 9;
+  int32 dataDirection = 10;
+  int64 startIndex = 11 ;
+  int32 pageNum = 12 ;
+  int32 pageSize = 13 ;
+  bool total = 14;
+  string collectionNameLikeIgnoreCase = 15;
+  string nameLikeIgnoreCase = 16;
+}
+
+message ClientPageListNftAssetGroupResponse {
+  int64 total = 1;
+  repeated ClientNftAssetGroupResponse list = 2;
+  int64 totalBalance = 3;
+}
+
+message ClientNftAssetGroupResponse {
+  string chainName = 1;
+  string uid = 2;
+  string address = 3;
+  string tokenAddress = 4;
+  string tokenUri = 5;
+  string balance = 6;
+  string tokenType = 7;
+  string collectionName = 8;
+  int64 tokenIdAmount = 9;
+  int64 cursor = 10;
+}
+
+message ClientPageListNftAssetResponse {
+  int64 total = 1;
+  repeated ClientNftAssetResponse list = 2;
+}
+
+message ClientNftAssetResponse {
+  int64 id = 1;
+  string chainName = 2;
+  string uid = 3;
+  string address = 4;
+  string tokenAddress = 5;
+  string tokenUri = 6;
+  string tokenId = 7;
+  string balance = 8;
+  string tokenType = 9;
+  string collectionName = 10;
+  string symbol = 11;
+  string name = 12;
+  string itemName = 13;
+  string itemUri = 14;
+  string itemOriginalUri = 15;
+  string itemAnimationUri = 16;
+  string data = 17;
+  int64 createdAt = 18;
+  int64 updatedAt = 19;
+  int64 cursor = 20;
+}
+
+message NftAssetRequest {
+  string chainName = 1 ;//-- 必输
+  string address = 2 ;//-- 必输
+  string tokenAddress = 3 ;//-- 必输
+  string tokenId = 4 ;//-- 必输
+}
+
+message NftBalanceResponse {
+  string balance = 1;
+}
+
+message PageListStatisticRequest {
+  string chainName = 1;//-- 非必输
+  repeated int32 fundDirectionList = 2;
+  string tokenAddress = 3;
+  int64 startTime = 4 ;
+  int64 stopTime = 5 ;
+  string orderBy = 6;
+  int32 dataDirection = 7;
+  int64 startIndex = 8 ;
+  int32 pageNum = 9 ;
+  int32 pageSize = 10 ;
+  bool total = 11;
+}
+
+message PageListStatisticResponse {
+  int64 total = 1;
+  repeated StatisticResponse list = 2;
+}
+
+message StatisticResponse {
+  int64 id = 1;
+  string chainName = 2;
+  string tokenAddress = 3;
+  int32 fundDirection = 4;
+  int32 fundType = 5;
+  int64 transactionQuantity = 6;
+  string amount = 7;
+  string cnyAmount = 8;
+  string usdAmount = 9;
+  int64 dt = 10;
+  int64 createdAt = 11;
+  int64 updatedAt = 12;
+  int64 cursor = 13;
+}
+
+message StatisticFundRequest {
+  string chainName = 1;//-- 非必输
+  repeated int32 fundDirectionList = 2;
+  int64 startTime = 3 ;
+  int64 stopTime = 4 ;
+}
+
+message FundAmountListResponse {
+  repeated FundAmountResponse list = 1;
+}
+
+message FundAmountResponse {
+  int32 fundDirection = 1;
+  string transactionQuantity = 2;
+  string amount = 3;
+  string cnyAmount = 4;
+  string usdAmount = 5;
+  int64 dt = 6;
+}
+
+message FundRateListResponse {
+  repeated FundRateResponse list = 1;
+}
+
+message FundRateResponse {
+  int32 fundDirection = 1;
+  int32 fundType = 2;
+  string transactionQuantity = 3;
+  string amount = 4;
+  string cnyAmount = 5;
+  string usdAmount = 6;
+  string rate = 7;
+}
+
+
+message KanbanSummaryRequest {
+  string chainName = 1;
+  string address = 2;
+  string uid = 3;
+}
+
+message KanbanRank {
+  int32 topPercent = 1; //10 即为前 10%
+  string lowerBound = 2; // 当前排名的下界，大于等于此值且小于更高排名区间的下界则位于当前排名区间
+}
+
+message KanbanTopPercent {
+  int32 totalTx = 1;          // 总交易数
+  int32 totalTxAmount = 2;    // 总交易金额
+  int32 totalContract = 3;    // 交互合约数
+  int32 totalTxInAmount = 4;  // 总转入金额
+}
+
+message KanbanSummaryResponse {
+  uint64 firstTxTime = 1; // UTC
+  uint64 totalTxNum = 2;    // 总交易次数
+  string totalTxAmount = 3; // 总交易额
+  uint64 totalContract = 4; // 交互合约数
+  string totalTxInAmount = 5; // 总转入金额
+  repeated KanbanRank totalTxsRanks = 6;
+  repeated KanbanRank totalTxAmountRanks = 7;
+  repeated KanbanRank totalContractRanks = 8;
+  repeated KanbanRank totalTxInAmountRanks = 9;
+  optional KanbanTopPercent topPercents = 10;
+}
+
+message KanbanChartRequest {
+  string chainName = 1;
+  string address = 2;
+  uint64 startTime = 3;  // UTC
+  uint64 endTime = 4;    // UTC
+  string uid = 5;
+}
+
+
+message KanbanBar {
+  uint64 time = 1; // UTC
+  uint64 value = 2;
+}
+
+message KanbanChartResponse {
+  repeated KanbanBar numsByDay = 1;
+  repeated KanbanBar accumulatedNums = 2;
+}
+
+message GetBlockHeightReq{
+  string chainName = 1;
+}
+
+message GetBlockHeightResponse{
+  int64 height = 1;
+}
