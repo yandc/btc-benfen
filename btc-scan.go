@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -70,7 +69,7 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 		IsUnspent: "1",
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Failed to fetch unspent transactions: %v", err)
 	}
 	if !resp.Ok {
 		return "", fmt.Errorf("Failed to fetch unspent transactions")
@@ -88,7 +87,7 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 	feeUrl := "https://api.blockcypher.com/v1/btc/main"
 	feeResp, err := http.Get(feeUrl)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to fetch bytefee: %w", err)
 	}
 	defer feeResp.Body.Close()
 
@@ -112,7 +111,7 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 		},
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Failed to submit approval: %v", err)
 	}
 	if !resp2.Ok {
 		return "", fmt.Errorf("Failed to submit approval")
@@ -133,8 +132,7 @@ func ScanBtcTxs(checkpoint string) ([]SimpleBtcTransfer, string, error) {
 		DataDirection: 2,
 	})
 	if err != nil {
-		log.Fatalf("Failed to fetch transactions: %v", err)
-		return nil, checkpoint, err
+		return nil, checkpoint, fmt.Errorf("Failed to fetch transactions: %v", err)
 	}
 
 	// 处理交易
