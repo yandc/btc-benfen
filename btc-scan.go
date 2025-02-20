@@ -122,6 +122,9 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 // 扫描比特币交易，并返回交易记录和断点
 func ScanBtcTxs(checkpoint string) ([]SimpleBtcTransfer, string, error) {
 	lastId, _ := strconv.ParseInt(checkpoint, 10, 64)
+	if lastId == 0 {
+		lastId = time.Now().Unix()
+	}
 	resp, err := SpiderClient.PageList(context.Background(), &client.PageListRequest{
 		PageNum:       1,
 		PageSize:      50,
