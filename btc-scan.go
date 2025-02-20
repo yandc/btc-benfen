@@ -177,7 +177,7 @@ func ScanBtcTxs(checkpoint string) ([]SimpleBtcTransfer, string, error) {
 }
 
 func main() {
-	InitClient("bc1qmax35qkxgke2aq2xugaxjl96q8f0k7l3ndhz9g", "361bdf3a1e0640979a3e2240c3361609", "U3IXmFgR848q5XA1vQVgdvW1Z69UvQXD", "IP_ADDRESS:8080")
+	InitClient("bc1qmax35qkxgke2aq2xugaxjl96q8f0k7l3ndhz9g", "361bdf3a1e0640979a3e2240c3361609", "U3IXmFgR848q5XA1vQVgdvW1Z69UvQXD", "10.10.2.78:8998")
 	aid, err := SubmitSendBtcApproval("bc1qmfg0j2gvegay6zy8638jdlh0fw82w99xkulvkd", "10000000")
 	fmt.Println(aid, err)
 	//ScanBtcTxs("0")
