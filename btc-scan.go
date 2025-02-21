@@ -95,8 +95,8 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 	if err := json.NewDecoder(feeResp.Body).Decode(&btcFee); err != nil {
 		return "", fmt.Errorf("failed to parse fee response: %w", err)
 	}
-	gasPrice := strconv.Itoa(btcFee.MediumFee / 1000)
 
+	gasPrice := strconv.Itoa(btcFee.MediumFee)
 	resp2, err := WalletClient.CompanyWallet.NewApproval(&apisdk.ParamNewApproval{
 		Action: "TRANSACTION",
 		TXInfo: apisdk.TXInfo{
