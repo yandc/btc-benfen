@@ -38,9 +38,9 @@ type SimpleBtcTransfer struct {
 }
 
 type BtcFee struct {
-	HighFee   int `json:"high_fee_per_kb"`
-	LowFee    int `json:"low_fee_per_kb"`
-	MediumFee int `json:"medium_fee_per_kb"`
+	HighFee   int `json:"fastestFee"`
+	LowFee    int `json:"hourFee"`
+	MediumFee int `json:"halfHourFee"`
 }
 
 var SpiderClient client.TransactionClient
@@ -83,8 +83,11 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 			Index:  utxo.Index,
 		})
 	}
+	if len(utxos) == 0 {
+		return "", fmt.Errorf("No unspent transactions found")
+	}
 
-	feeUrl := "https://api.blockcypher.com/v1/btc/main"
+	feeUrl := "https://mempool.space/api/v1/fees/recommended"
 	feeResp, err := http.Get(feeUrl)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch bytefee: %w", err)
@@ -95,8 +98,11 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 	if err := json.NewDecoder(feeResp.Body).Decode(&btcFee); err != nil {
 		return "", fmt.Errorf("failed to parse fee response: %w", err)
 	}
+	if btcFee.HighFee == 0 || btcFee.LowFee == 0 || btcFee.MediumFee == 0 {
+		return "", fmt.Errorf("failed to fetch bytefee")
+	}
 
-	gasPrice := strconv.Itoa(btcFee.MediumFee)
+	gasPrice := strconv.Itoa(btcFee.MediumFee * 1000)
 	resp2, err := WalletClient.CompanyWallet.NewApproval(&apisdk.ParamNewApproval{
 		Action: "TRANSACTION",
 		TXInfo: apisdk.TXInfo{
