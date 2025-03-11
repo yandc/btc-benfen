@@ -115,6 +115,7 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 			GasPrice:        gasPrice,
 			Utxo:            utxos,
 		},
+		Note: "跨出交易，源交易：xxxxxx",
 	})
 	if err != nil {
 		return "", fmt.Errorf("Failed to submit approval: %v", err)
