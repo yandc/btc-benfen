@@ -62,7 +62,7 @@ func InitClient(walletAddress, walletApikey, walletSecret, spiderServer string) 
 }
 
 // 发送比特币交易审批, 并返回审批ID
-func SubmitSendBtcApproval(address, amount string) (string, error) {
+func SubmitSendBtcApproval(address, amount, note string) (string, error) {
 	resp, err := SpiderClient.GetUnspentTx(context.Background(), &client.UnspentReq{
 		Address:   WalletAddress,
 		ChainName: "BTC",
@@ -115,7 +115,7 @@ func SubmitSendBtcApproval(address, amount string) (string, error) {
 			GasPrice:        gasPrice,
 			Utxo:            utxos,
 		},
-		Note: "跨出交易，源交易：xxxxxx",
+		Note: note,
 	})
 	if err != nil {
 		return "", fmt.Errorf("Failed to submit approval: %v", err)
