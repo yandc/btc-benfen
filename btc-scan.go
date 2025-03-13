@@ -114,6 +114,7 @@ func SubmitSendBtcApproval(address, amount, note string) (string, error) {
 			UseMaxAmount:    false,
 			GasPrice:        gasPrice,
 			Utxo:            utxos,
+			TotalGas:        strconv.FormatFloat(float64(btcFee.MediumFee*180.0/100000000.0), 'f', 8, 64),
 		},
 		Note: note,
 	})
