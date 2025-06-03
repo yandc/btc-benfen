@@ -1,5 +1,5 @@
-github.com/OpenBlockResource/openblock-api-sdk-go v0.0.2 h1:tdkMhCHyA8qeFuxwDz4uz8CV40qlRstEtlxxoXEONVQ=
-github.com/OpenBlockResource/openblock-api-sdk-go v0.0.2/go.mod h1:D7KIBGRFM5hAE+zvML1YVQD91cfXczJql8P37mGAR2Y=
+github.com/OpenBlockResource/openblock-api-sdk-go v0.0.3 h1:Qi988A6Rqy0zK+SdVkIRCYiDr/AoEWqc8uxAugdjwA4=
+github.com/OpenBlockResource/openblock-api-sdk-go v0.0.3/go.mod h1:D7KIBGRFM5hAE+zvML1YVQD91cfXczJql8P37mGAR2Y=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg=
 github.com/golang/protobuf v1.5.3/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
